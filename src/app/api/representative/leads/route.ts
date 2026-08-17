@@ -1,0 +1,6 @@
+import { NextResponse } from "next/server"
+import { z } from "zod"
+import { requireRole } from "@/lib/auth"
+import { prisma } from "@/lib/prisma"
+const schema=z.object({companyName:z.string().min(2),contactName:z.string().min(2),phone:z.string().min(6),email:z.union([z.string().email(),z.literal("")]).optional(),city:z.string().min(2),state:z.string().min(2).max(2),source:z.string().optional(),valueEstimate:z.union([z.coerce.number().nonnegative(),z.literal("")]).optional()})
+export async function POST(request:Request){const user=await requireRole(["REPRESENTATIVE"]);if(!user.representative)return NextResponse.json({error:"Representante não vinculado"},{status:400});const parsed=schema.safeParse(await request.json().catch(()=>({})));if(!parsed.success)return NextResponse.json({error:"Revise os dados."},{status:400});const d=parsed.data;const lead=await prisma.lead.create({data:{representativeId:user.representative.id,companyName:d.companyName,contactName:d.contactName,phone:d.phone,email:d.email||null,city:d.city,state:d.state.toUpperCase(),source:d.source||null,valueEstimate:typeof d.valueEstimate==="number"?d.valueEstimate:null,status:"NEW"}});return NextResponse.json({ok:true,lead})}
