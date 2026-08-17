@@ -1,0 +1,14 @@
+import Link from "next/link"
+import Image from "next/image"
+import { redirect } from "next/navigation"
+import { ArrowLeft, Building2, ShieldCheck, UsersRound } from "lucide-react"
+import { BrandMark } from "@/components/brand-mark"
+import { LoginForm } from "@/components/login-form"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { getCurrentUser, roleHome } from "@/lib/auth"
+
+export default async function LoginPage() {
+  const user = await getCurrentUser()
+  if (user) redirect(roleHome(user.role))
+  return <main className="grid min-h-screen lg:grid-cols-[1fr_1fr]"><section className="relative hidden overflow-hidden p-12 text-white lg:flex lg:flex-col lg:justify-between"><Image src="/images/products/tronco-americano-cremalheira.webp" alt="Equipamento PGM" fill priority sizes="50vw" className="object-cover"/><div className="absolute inset-0 bg-primary/90"/><div className="relative w-fit bg-white p-3"><BrandMark/></div><div className="relative max-w-xl"><p className="text-xs font-extrabold uppercase tracking-[.2em] text-sky-200">Portal PGM B2B</p><h1 className="font-display mt-3 text-5xl font-black tracking-tight">Uma única área para todo o relacionamento comercial.</h1><p className="mt-5 text-lg leading-8 text-sky-100">Clientes acompanham compras e documentos. Representantes gerenciam carteira, leads e comissões. A gestão controla todo o fluxo.</p><div className="mt-9 grid gap-4 sm:grid-cols-3">{[[Building2,"Clientes"],[UsersRound,"Representantes"],[ShieldCheck,"Gestão"]].map(([Icon,label]) => {const I=Icon as typeof Building2; return <div key={String(label)} className="border border-white/20 bg-white/10 p-4 backdrop-blur"><I className="size-5 text-sky-200"/><p className="mt-3 font-semibold">{String(label)}</p></div>})}</div></div><p className="relative text-xs text-sky-100/70">Acesso protegido por sessão e perfis de permissão.</p></section><section className="flex items-center justify-center bg-sky-50 p-5 sm:p-10"><div className="w-full max-w-md"><Link href="/" className="mb-6 inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground"><ArrowLeft className="size-4"/>Voltar ao site</Link><div className="mb-8 lg:hidden"><BrandMark/></div><Card className="border-sky-200"><CardHeader><CardTitle className="font-display text-2xl">Acessar sua conta</CardTitle><CardDescription>Use seu e-mail e senha cadastrados na PGM.</CardDescription></CardHeader><CardContent><LoginForm/><div className="mt-6 bg-muted p-4 text-xs leading-5 text-muted-foreground"><strong className="block text-foreground">Ambiente de demonstração</strong>Admin: admin@pgm.local<br/>Representante: representante@pgm.local<br/>Cliente: cliente@pgm.local<br/>Senha: <strong>Pgm@2026</strong></div></CardContent></Card></div></section></main>
+}

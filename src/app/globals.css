@@ -1,0 +1,56 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+:root {
+  --background: #f7fbfd;
+  --foreground: #17243a;
+  --card: #ffffff;
+  --card-foreground: #17243a;
+  --primary: #1018b8;
+  --primary-foreground: #ffffff;
+  --secondary: #dff3fc;
+  --secondary-foreground: #153e5c;
+  --muted: #edf6fa;
+  --muted-foreground: #607586;
+  --destructive: #b42318;
+  --destructive-foreground: #ffffff;
+  --border: #cfe2eb;
+  --input: #bcd5e0;
+  --ring: #60bce7;
+  --brand-sky: #60bce7;
+  --brand-navy: #244f70;
+  --brand-blue: #1018b8;
+  --brand-ink: #202027;
+  --radius: .4rem;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --font-sans: var(--font-inter);
+}
+
+* { border-color: var(--border); }
+html { scroll-behavior: smooth; }
+body { background: var(--background); color: var(--foreground); }
+button, a { -webkit-tap-highlight-color: transparent; }
+.container-wide { width: min(100% - 2rem, 1280px); margin-inline: auto; }
+.grid-auto { grid-template-columns: repeat(auto-fit, minmax(min(100%, 270px), 1fr)); }
+.font-display { font-family: Georgia, Cambria, "Times New Roman", serif; }
+.catalog-dots { background-image: radial-gradient(circle, rgba(16,24,184,.35) 2px, transparent 2.5px); background-size: 22px 22px; }
+.catalog-grid { background-image: linear-gradient(rgba(96,188,231,.13) 1px, transparent 1px), linear-gradient(90deg, rgba(96,188,231,.13) 1px, transparent 1px); background-size: 34px 34px; }
+.brand-rule { height: 7px; width: min(100%, 520px); background: var(--brand-blue); }
+.brand-rule-sky { height: 5px; width: min(100%, 520px); background: var(--brand-sky); }
