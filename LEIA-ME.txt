@@ -1,0 +1,14 @@
+CORREÇÃO DO BUILD - TRONCOS & BALANÇAS PGM
+
+1. Extraia este ZIP dentro de C:\troncosbalancaspgm
+2. Confirme a substituição dos 4 arquivos existentes.
+3. No terminal, dentro de C:\troncosbalancaspgm, rode:
+
+   docker compose down
+   docker compose --progress=plain build --no-cache
+   docker compose up -d
+
+4. Depois abra http://localhost:3000
+
+A correção ajusta o helper monetário para aceitar Prisma Decimal e marca
+as páginas públicas que acessam o banco como dinâmicas durante o build.
