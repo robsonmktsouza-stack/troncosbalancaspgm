@@ -1,0 +1,7 @@
+import { NextResponse } from "next/server"
+import { z } from "zod"
+import { requireRole } from "@/lib/auth"
+import { prisma } from "@/lib/prisma"
+const schema=z.object({sku:z.string().min(2),categoryId:z.string().min(1),name:z.string().min(3),shortDescription:z.string().min(5),description:z.string().min(5),leadTimeDays:z.coerce.number().int().positive().optional(),warrantyMonths:z.coerce.number().int().positive().optional()})
+function slugify(v:string){return v.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/(^-|-$)/g,"")}
+export async function POST(request:Request){const user=await requireRole(["ADMIN"]);const parsed=schema.safeParse(await request.json().catch(()=>({})));if(!parsed.success)return NextResponse.json({error:"Revise os dados do produto."},{status:400});const d=parsed.data;const base=slugify(d.name);let slug=base;let n=2;while(await prisma.product.findUnique({where:{slug}})){slug=`${base}-${n++}`}try{const product=await prisma.product.create({data:{...d,slug,status:"ACTIVE",priceOnRequest:true,stockStatus:"Sob encomenda"}});await prisma.auditLog.create({data:{userId:user.id,action:"CREATE",entity:"Product",entityId:product.id,payload:{sku:product.sku,name:product.name}}});return NextResponse.json({ok:true,product})}catch{return NextResponse.json({error:"Não foi possível cadastrar. Verifique se o SKU já existe."},{status:409})}}
