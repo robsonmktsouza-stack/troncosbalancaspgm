@@ -1,0 +1,7 @@
+import bcrypt from "bcryptjs"
+import { NextResponse } from "next/server"
+import { z } from "zod"
+import { requireRole } from "@/lib/auth"
+import { prisma } from "@/lib/prisma"
+const schema=z.object({name:z.string().min(3),code:z.string().min(3),email:z.string().email(),password:z.string().min(6),phone:z.string().optional(),region:z.string().min(2),states:z.string().min(2),commissionRate:z.coerce.number().min(0).max(100)})
+export async function POST(request:Request){const admin=await requireRole(["ADMIN"]);const parsed=schema.safeParse(await request.json().catch(()=>({})));if(!parsed.success)return NextResponse.json({error:"Revise os dados obrigatórios."},{status:400});const d=parsed.data;try{const hash=await bcrypt.hash(d.password,12);const rep=await prisma.$transaction(async tx=>{const user=await tx.user.create({data:{name:d.name,email:d.email.toLowerCase(),passwordHash:hash,role:"REPRESENTATIVE",phone:d.phone||null}});return tx.representative.create({data:{userId:user.id,code:d.code.toUpperCase(),region:d.region,states:d.states.split(",").map(s=>s.trim().toUpperCase()).filter(Boolean),commissionRate:d.commissionRate,active:true}})});await prisma.auditLog.create({data:{userId:admin.id,action:"CREATE",entity:"Representative",entityId:rep.id,payload:{code:rep.code}}});return NextResponse.json({ok:true,rep})}catch{return NextResponse.json({error:"E-mail ou código já cadastrado."},{status:409})}}

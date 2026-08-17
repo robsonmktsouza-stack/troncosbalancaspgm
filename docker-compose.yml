@@ -1,0 +1,34 @@
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-pgm}
+      POSTGRES_USER: ${POSTGRES_USER:-pgm}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-pgm}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-pgm} -d ${POSTGRES_DB:-pgm}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    volumes:
+      - pgm_postgres:/var/lib/postgresql/data
+
+  web:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-pgm}:${POSTGRES_PASSWORD:-pgm}@db:5432/${POSTGRES_DB:-pgm}?schema=public
+      APP_URL: ${APP_URL:-http://localhost:3000}
+      SESSION_COOKIE_NAME: ${SESSION_COOKIE_NAME:-pgm_session}
+      UPLOAD_MAX_MB: ${UPLOAD_MAX_MB:-8}
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./storage:/app/storage
+
+volumes:
+  pgm_postgres:

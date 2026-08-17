@@ -1,0 +1,9 @@
+"use client"
+import { useRouter } from "next/navigation"
+import { useState } from "react"
+import { Loader2, Save } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+
+export function PriceUpsertForm({tables,products}:{tables:{id:string;name:string}[];products:{id:string;name:string;sku:string}[]}){const router=useRouter();const[busy,setBusy]=useState(false);const[msg,setMsg]=useState("");async function submit(fd:FormData){setBusy(true);setMsg("");const r=await fetch("/api/admin/prices",{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(Object.fromEntries(fd.entries()))});const d=await r.json();setBusy(false);setMsg(r.ok?"Preço salvo.":d.error||"Falha");if(r.ok)router.refresh()}return <form action={submit} className="grid gap-3 md:grid-cols-[1fr_1.4fr_.6fr_.6fr_auto]"><div className="grid gap-2"><Label>Tabela</Label><select name="priceTableId" className="h-10 rounded-lg border bg-white px-3 text-sm">{tables.map(t=><option key={t.id} value={t.id}>{t.name}</option>)}</select></div><div className="grid gap-2"><Label>Produto</Label><select name="productId" className="h-10 rounded-lg border bg-white px-3 text-sm">{products.map(p=><option key={p.id} value={p.id}>{p.sku} • {p.name}</option>)}</select></div><div className="grid gap-2"><Label>Preço</Label><Input name="price" type="number" min="0" step="0.01" required/></div><div className="grid gap-2"><Label>Qtd. mín.</Label><Input name="minQty" type="number" min="0.001" step="0.001" defaultValue="1" required/></div><div className="flex items-end"><Button disabled={busy}>{busy?<Loader2 className="animate-spin"/>:<Save/>}Salvar</Button></div>{msg&&<p className="text-xs font-medium text-muted-foreground md:col-span-5">{msg}</p>}</form>}

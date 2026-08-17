@@ -1,0 +1,8 @@
+import bcrypt from "bcryptjs"
+import { NextResponse } from "next/server"
+import { z } from "zod"
+import { requireRole } from "@/lib/auth"
+import { prisma } from "@/lib/prisma"
+const empty=z.string().optional().transform(v=>v||undefined)
+const schema=z.object({legalName:z.string().min(3),tradeName:empty,document:z.string().min(5),segment:empty,email:z.string().email(),password:z.string().min(6),phone:z.string().min(6),whatsapp:empty,city:z.string().min(2),state:z.string().min(2).max(2),representativeId:empty,priceTableId:empty})
+export async function POST(request:Request){const admin=await requireRole(["ADMIN"]);const parsed=schema.safeParse(await request.json().catch(()=>({})));if(!parsed.success)return NextResponse.json({error:"Revise os dados obrigatórios."},{status:400});const d=parsed.data;try{const hash=await bcrypt.hash(d.password,12);const customer=await prisma.$transaction(async tx=>{const user=await tx.user.create({data:{name:d.tradeName||d.legalName,email:d.email.toLowerCase(),passwordHash:hash,role:"CUSTOMER",phone:d.phone}});return tx.customer.create({data:{userId:user.id,legalName:d.legalName,tradeName:d.tradeName,document:d.document,email:d.email.toLowerCase(),phone:d.phone,whatsapp:d.whatsapp,city:d.city,state:d.state.toUpperCase(),segment:d.segment,status:"ACTIVE",representativeId:d.representativeId,priceTableId:d.priceTableId}})});await prisma.auditLog.create({data:{userId:admin.id,action:"CREATE",entity:"Customer",entityId:customer.id,payload:{document:customer.document}}});return NextResponse.json({ok:true,customer})}catch{return NextResponse.json({error:"E-mail ou documento já cadastrado, ou vínculo inválido."},{status:409})}}
