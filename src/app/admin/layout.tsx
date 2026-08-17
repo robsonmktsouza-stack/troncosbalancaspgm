@@ -1,0 +1,5 @@
+import { Boxes, Building2, LayoutDashboard, PackageCheck, ReceiptText, Settings, UsersRound, Tags, ScrollText, FolderOpen } from "lucide-react"
+import { PortalShell } from "@/components/portal-shell"
+import { requireRole } from "@/lib/auth"
+
+export default async function AdminLayout({children}:{children:React.ReactNode}){const user=await requireRole(["ADMIN"]);const items=[{label:"Visão geral",href:"/admin",icon:LayoutDashboard},{label:"Produtos",href:"/admin/produtos",icon:Boxes},{label:"Clientes",href:"/admin/clientes",icon:Building2},{label:"Tabelas de preço",href:"/admin/tabelas-preco",icon:Tags},{label:"Documentos",href:"/admin/documentos",icon:FolderOpen},{label:"Orçamentos",href:"/admin/orcamentos",icon:ReceiptText},{label:"Pedidos",href:"/admin/pedidos",icon:PackageCheck},{label:"Representantes",href:"/admin/representantes",icon:UsersRound},{label:"Auditoria",href:"/admin/auditoria",icon:ScrollText},{label:"Configurações",href:"/admin/configuracoes",icon:Settings}];return <PortalShell title="Administração" subtitle="Operação PGM" userName={user.name} items={items}>{children}</PortalShell>}
