@@ -1,6 +1,6 @@
-# PGM — Site + Catálogo + Portal B2B
+# Troncos e Balanças Paragominas — Site + Catálogo + Portal B2B
 
-Plataforma comercial completa para **Troncos & Balanças PGM**: site institucional, catálogo técnico, área do cliente, CRM de representantes, orçamento/pedidos e painel administrativo.
+Plataforma comercial completa da **Troncos e Balanças Paragominas**: site institucional com a identidade oficial da marca, catálogo técnico com fotos reais, área do cliente, CRM de representantes, orçamento/pedidos e painel administrativo.
 
 ## Stack
 
@@ -37,7 +37,9 @@ Troque/remova essas credenciais antes de publicar em produção.
 ## Módulos entregues
 
 ### Site público
-- Home industrial responsiva
+- Identidade visual baseada no catálogo oficial PGM 2025
+- Logo, paleta e fotografias reais dos equipamentos
+- Home institucional responsiva
 - Catálogo por categoria
 - Busca por nome, SKU e descrição
 - Página individual de produto
@@ -113,8 +115,8 @@ sh scripts/restore.sh backups/pgm-AAAAMMDD-HHMMSS.sql.gz
 Antes de publicar:
 1. trocar senha do PostgreSQL;
 2. remover ou trocar usuários demo;
-3. cadastrar dados reais da PGM em **Administração → Configurações**;
+3. revisar os dados da PGM em **Administração → Configurações**;
 4. substituir documentos demonstrativos por fichas oficiais;
-5. cadastrar catálogo, imagens, preços e representantes reais;
+5. revisar preços e cadastrar a rede de representantes;
 6. colocar proxy HTTPS (Caddy, Nginx ou serviço equivalente) na frente da porta 3000;
 7. configurar rotina externa de backup do volume PostgreSQL e `storage/`.
