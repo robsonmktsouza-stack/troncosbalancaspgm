@@ -1,0 +1,431 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  CUSTOMER
+  REPRESENTATIVE
+}
+
+enum CustomerStatus {
+  PROSPECT
+  ACTIVE
+  BLOCKED
+  INACTIVE
+}
+
+enum ProductStatus {
+  DRAFT
+  ACTIVE
+  INACTIVE
+}
+
+enum QuoteStatus {
+  REQUESTED
+  IN_ANALYSIS
+  SENT
+  APPROVED
+  REJECTED
+  EXPIRED
+  CONVERTED
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  IN_PRODUCTION
+  READY_TO_SHIP
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  PROPOSAL
+  WON
+  LOST
+}
+
+enum CommissionStatus {
+  FORECAST
+  APPROVED
+  PAID
+  CANCELLED
+}
+
+model User {
+  id String @id @default(cuid())
+  name String
+  email String @unique
+  passwordHash String
+  role UserRole
+  active Boolean @default(true)
+  phone String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  sessions Session[]
+  customer Customer?
+  representative Representative?
+  notifications Notification[]
+  auditLogs AuditLog[]
+  createdQuotes Quote[] @relation("QuoteCreatedBy")
+}
+
+model Session {
+  id String @id @default(cuid())
+  token String @unique
+  userId String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model Representative {
+  id String @id @default(cuid())
+  userId String @unique
+  code String @unique
+  region String
+  states String[]
+  commissionRate Decimal @default(0) @db.Decimal(5,2)
+  active Boolean @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user User @relation(fields:[userId], references:[id], onDelete:Cascade)
+  customers Customer[]
+  leads Lead[]
+  quotes Quote[]
+  orders Order[]
+  commissions Commission[]
+}
+
+model Customer {
+  id String @id @default(cuid())
+  userId String? @unique
+  representativeId String?
+  priceTableId String?
+  legalName String
+  tradeName String?
+  document String @unique
+  stateRegistration String?
+  email String
+  phone String
+  whatsapp String?
+  city String
+  state String
+  segment String?
+  status CustomerStatus @default(PROSPECT)
+  creditLimit Decimal? @db.Decimal(14,2)
+  notes String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user User? @relation(fields:[userId], references:[id], onDelete:SetNull)
+  representative Representative? @relation(fields:[representativeId], references:[id], onDelete:SetNull)
+  priceTable PriceTable? @relation(fields:[priceTableId], references:[id], onDelete:SetNull)
+  addresses Address[]
+  quotes Quote[]
+  orders Order[]
+  documents CustomerDocument[]
+  @@index([representativeId])
+  @@index([status])
+  @@index([state, city])
+}
+
+model Address {
+  id String @id @default(cuid())
+  customerId String
+  label String
+  postalCode String
+  street String
+  number String
+  complement String?
+  district String
+  city String
+  state String
+  isDefault Boolean @default(false)
+  createdAt DateTime @default(now())
+  customer Customer @relation(fields:[customerId], references:[id], onDelete:Cascade)
+  @@index([customerId])
+}
+
+model Category {
+  id String @id @default(cuid())
+  parentId String?
+  name String
+  slug String @unique
+  description String?
+  icon String?
+  sortOrder Int @default(0)
+  active Boolean @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  parent Category? @relation("CategoryTree", fields:[parentId], references:[id], onDelete:SetNull)
+  children Category[] @relation("CategoryTree")
+  products Product[]
+  @@index([parentId])
+  @@index([active, sortOrder])
+}
+
+model Product {
+  id String @id @default(cuid())
+  categoryId String
+  sku String @unique
+  name String
+  slug String @unique
+  shortDescription String
+  description String
+  status ProductStatus @default(ACTIVE)
+  featured Boolean @default(false)
+  priceOnRequest Boolean @default(true)
+  basePrice Decimal? @db.Decimal(14,2)
+  unit String @default("UN")
+  stockStatus String @default("Sob encomenda")
+  leadTimeDays Int?
+  warrantyMonths Int? @default(12)
+  heroImage String?
+  techSpecs Json?
+  dimensions Json?
+  metaTitle String?
+  metaDescription String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  category Category @relation(fields:[categoryId], references:[id], onDelete:Restrict)
+  images ProductImage[]
+  documents ProductDocument[]
+  priceItems PriceTableItem[]
+  quoteItems QuoteItem[]
+  orderItems OrderItem[]
+  @@index([categoryId, status])
+  @@index([featured, status])
+}
+
+model ProductImage {
+  id String @id @default(cuid())
+  productId String
+  url String
+  alt String?
+  sortOrder Int @default(0)
+  createdAt DateTime @default(now())
+  product Product @relation(fields:[productId], references:[id], onDelete:Cascade)
+  @@index([productId, sortOrder])
+}
+
+model ProductDocument {
+  id String @id @default(cuid())
+  productId String
+  title String
+  type String
+  url String
+  version String?
+  isPublic Boolean @default(true)
+  createdAt DateTime @default(now())
+  product Product @relation(fields:[productId], references:[id], onDelete:Cascade)
+  @@index([productId])
+}
+
+model PriceTable {
+  id String @id @default(cuid())
+  code String @unique
+  name String
+  active Boolean @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  items PriceTableItem[]
+  customers Customer[]
+}
+
+model PriceTableItem {
+  id String @id @default(cuid())
+  priceTableId String
+  productId String
+  price Decimal @db.Decimal(14,2)
+  minQty Decimal @default(1) @db.Decimal(12,3)
+  priceTable PriceTable @relation(fields:[priceTableId], references:[id], onDelete:Cascade)
+  product Product @relation(fields:[productId], references:[id], onDelete:Cascade)
+  @@unique([priceTableId, productId])
+  @@index([productId])
+}
+
+model Quote {
+  id String @id @default(cuid())
+  number String @unique
+  customerId String?
+  representativeId String?
+  createdById String?
+  prospectName String?
+  prospectDocument String?
+  prospectEmail String?
+  prospectPhone String?
+  prospectCity String?
+  prospectState String?
+  status QuoteStatus @default(REQUESTED)
+  validUntil DateTime?
+  subtotal Decimal @default(0) @db.Decimal(14,2)
+  discount Decimal @default(0) @db.Decimal(14,2)
+  freight Decimal @default(0) @db.Decimal(14,2)
+  total Decimal @default(0) @db.Decimal(14,2)
+  notes String?
+  commercialTerms String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  customer Customer? @relation(fields:[customerId], references:[id], onDelete:SetNull)
+  representative Representative? @relation(fields:[representativeId], references:[id], onDelete:SetNull)
+  createdBy User? @relation("QuoteCreatedBy", fields:[createdById], references:[id], onDelete:SetNull)
+  items QuoteItem[]
+  order Order?
+  @@index([customerId, status])
+  @@index([representativeId, status])
+  @@index([createdAt])
+}
+
+model QuoteItem {
+  id String @id @default(cuid())
+  quoteId String
+  productId String
+  quantity Decimal @default(1) @db.Decimal(12,3)
+  unitPrice Decimal @default(0) @db.Decimal(14,2)
+  discount Decimal @default(0) @db.Decimal(14,2)
+  total Decimal @default(0) @db.Decimal(14,2)
+  notes String?
+  quote Quote @relation(fields:[quoteId], references:[id], onDelete:Cascade)
+  product Product @relation(fields:[productId], references:[id], onDelete:Restrict)
+  @@index([quoteId])
+  @@index([productId])
+}
+
+model Order {
+  id String @id @default(cuid())
+  number String @unique
+  quoteId String? @unique
+  customerId String
+  representativeId String?
+  status OrderStatus @default(PENDING)
+  subtotal Decimal @default(0) @db.Decimal(14,2)
+  discount Decimal @default(0) @db.Decimal(14,2)
+  freight Decimal @default(0) @db.Decimal(14,2)
+  total Decimal @default(0) @db.Decimal(14,2)
+  paymentTerms String?
+  deliveryForecast DateTime?
+  shippingAddress Json?
+  trackingCode String?
+  notes String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  quote Quote? @relation(fields:[quoteId], references:[id], onDelete:SetNull)
+  customer Customer @relation(fields:[customerId], references:[id], onDelete:Restrict)
+  representative Representative? @relation(fields:[representativeId], references:[id], onDelete:SetNull)
+  items OrderItem[]
+  commissions Commission[]
+  @@index([customerId, status])
+  @@index([representativeId, status])
+  @@index([createdAt])
+}
+
+model OrderItem {
+  id String @id @default(cuid())
+  orderId String
+  productId String
+  quantity Decimal @default(1) @db.Decimal(12,3)
+  unitPrice Decimal @default(0) @db.Decimal(14,2)
+  discount Decimal @default(0) @db.Decimal(14,2)
+  total Decimal @default(0) @db.Decimal(14,2)
+  notes String?
+  order Order @relation(fields:[orderId], references:[id], onDelete:Cascade)
+  product Product @relation(fields:[productId], references:[id], onDelete:Restrict)
+  @@index([orderId])
+  @@index([productId])
+}
+
+model Lead {
+  id String @id @default(cuid())
+  representativeId String
+  companyName String
+  contactName String
+  document String?
+  phone String
+  email String?
+  city String
+  state String
+  source String?
+  status LeadStatus @default(NEW)
+  valueEstimate Decimal? @db.Decimal(14,2)
+  notes String?
+  nextActionAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  representative Representative @relation(fields:[representativeId], references:[id], onDelete:Cascade)
+  @@index([representativeId, status])
+  @@index([nextActionAt])
+}
+
+model Commission {
+  id String @id @default(cuid())
+  representativeId String
+  orderId String?
+  competence String
+  percentage Decimal @db.Decimal(5,2)
+  baseAmount Decimal @db.Decimal(14,2)
+  amount Decimal @db.Decimal(14,2)
+  status CommissionStatus @default(FORECAST)
+  paidAt DateTime?
+  createdAt DateTime @default(now())
+  representative Representative @relation(fields:[representativeId], references:[id], onDelete:Cascade)
+  order Order? @relation(fields:[orderId], references:[id], onDelete:SetNull)
+  @@index([representativeId, status])
+  @@index([competence])
+}
+
+model CustomerDocument {
+  id String @id @default(cuid())
+  customerId String
+  title String
+  type String
+  url String
+  issuedAt DateTime?
+  createdAt DateTime @default(now())
+  customer Customer @relation(fields:[customerId], references:[id], onDelete:Cascade)
+  @@index([customerId])
+}
+
+model Notification {
+  id String @id @default(cuid())
+  userId String
+  title String
+  message String
+  href String?
+  readAt DateTime?
+  createdAt DateTime @default(now())
+  user User @relation(fields:[userId], references:[id], onDelete:Cascade)
+  @@index([userId, readAt])
+}
+
+model AuditLog {
+  id String @id @default(cuid())
+  userId String?
+  action String
+  entity String
+  entityId String?
+  payload Json?
+  ip String?
+  createdAt DateTime @default(now())
+  user User? @relation(fields:[userId], references:[id], onDelete:SetNull)
+  @@index([entity, entityId])
+  @@index([createdAt])
+}
+
+model CompanySetting {
+  id String @id @default(cuid())
+  key String @unique
+  value Json
+  updatedAt DateTime @updatedAt
+}
