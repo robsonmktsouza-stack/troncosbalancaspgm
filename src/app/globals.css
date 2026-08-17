@@ -2,7 +2,7 @@
 @import "tw-animate-css";
 
 :root {
-  --background: #f7fbfd;
+  --background: #ffffff;
   --foreground: #17243a;
   --card: #ffffff;
   --card-foreground: #17243a;
@@ -47,10 +47,18 @@
 html { scroll-behavior: smooth; }
 body { background: var(--background); color: var(--foreground); }
 button, a { -webkit-tap-highlight-color: transparent; }
-.container-wide { width: min(100% - 2rem, 1280px); margin-inline: auto; }
+.container-wide { width: min(100% - 2rem, 1180px); margin-inline: auto; }
 .grid-auto { grid-template-columns: repeat(auto-fit, minmax(min(100%, 270px), 1fr)); }
-.font-display { font-family: Georgia, Cambria, "Times New Roman", serif; }
+.font-display { font-family: var(--font-inter), Arial, sans-serif; }
 .catalog-dots { background-image: radial-gradient(circle, rgba(16,24,184,.35) 2px, transparent 2.5px); background-size: 22px 22px; }
 .catalog-grid { background-image: linear-gradient(rgba(96,188,231,.13) 1px, transparent 1px), linear-gradient(90deg, rgba(96,188,231,.13) 1px, transparent 1px); background-size: 34px 34px; }
 .brand-rule { height: 7px; width: min(100%, 520px); background: var(--brand-blue); }
 .brand-rule-sky { height: 5px; width: min(100%, 520px); background: var(--brand-sky); }
+.home-banner { --banner-edge: #1018b8; display: grid; min-height: 376px; grid-template-columns: 1.05fr .95fr; color: white; background: var(--banner-edge); }
+.home-banner-dark { --banner-edge: #1018b8; background: linear-gradient(120deg, #0d168f, #1018b8); }
+.home-banner-sky { --banner-edge: #245879; background: linear-gradient(120deg, #163f5e, #286f96); }
+.home-banner-light { --banner-edge: #17243a; background: linear-gradient(120deg, #17243a, #244f70); }
+
+@media (max-width: 767px) {
+  .home-banner { grid-template-columns: 1fr; }
+}

@@ -1,51 +1,110 @@
 import Image from "next/image"
 import Link from "next/link"
-import { ArrowRight, BadgeCheck, Factory, Gauge, MapPinned, MessageCircle, Scale, ShieldCheck, Truck, Wrench } from "lucide-react"
-import { SiteHeader } from "@/components/site-header"
-import { SiteFooter } from "@/components/site-footer"
+import { FileText, MessageCircle, ShieldCheck, Truck, UserRound, Wrench } from "lucide-react"
+import type { LucideIcon } from "lucide-react"
+import { HomeHeroSlider } from "@/components/home-hero-slider"
 import { ProductCard } from "@/components/product-card"
-import { Button } from "@/components/ui/button"
+import { SiteFooter } from "@/components/site-footer"
+import { SiteHeader } from "@/components/site-header"
 import { prisma } from "@/lib/prisma"
 
 export const dynamic = "force-dynamic"
 
+const categoryImages: Record<string, string> = {
+  "troncos-de-contencao": "/images/products/tronco-americano-contencao.webp",
+  "balancas-pecuarias": "/images/products/balanca-mecanica-1500.webp",
+  "bretes-e-corredores": "/images/products/gradil-balanca-eletronica.webp",
+  "porteiras-e-acessorios": "/images/products/porteira-tubular.webp",
+  "pecas-e-eletronica": "/images/products/indicador-eletronico.webp",
+}
+
+const infoCards: Array<{ icon: LucideIcon; title: string; text: string; href: string }> = [
+  { icon: ShieldCheck, title: "Equipamentos reforçados", text: "Conheça os materiais, acabamentos e soluções pensadas para dar mais segurança ao manejo.", href: "/empresa" },
+  { icon: FileText, title: "Catálogo técnico", text: "Consulte fotos reais, especificações e detalhes dos produtos fabricados pela PGM.", href: "/catalogo" },
+  { icon: MessageCircle, title: "Atendimento da fábrica", text: "Converse com a equipe, explique sua estrutura e solicite uma orientação comercial.", href: "/contato" },
+]
+
+const serviceHighlights: Array<{ icon: LucideIcon; title: string; text: string }> = [
+  { icon: Wrench, title: "Fabricação própria", text: "Controle em cada etapa" },
+  { icon: ShieldCheck, title: "Manejo seguro", text: "Estruturas firmes e confiáveis" },
+  { icon: Truck, title: "Atendimento direto", text: "Paragominas e região" },
+]
+
+type ShowcaseProduct = {
+  id: string
+  name: string
+  slug: string
+  sku: string
+  shortDescription: string
+  stockStatus: string
+  heroImage: string | null
+  category: { name: string }
+}
+
+function ProductShowcase({ title, products }: { title: string; products: ShowcaseProduct[] }) {
+  if (products.length === 0) return null
+  return <section className="container-wide py-12 sm:py-16">
+    <h2 className="text-center text-2xl font-normal tracking-tight text-slate-950 sm:text-3xl">{title}</h2>
+    <div className="mx-auto mt-3 h-1 w-16 bg-primary" />
+    <div className="mt-9 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{products.map((product) => <ProductCard key={product.id} product={product} />)}</div>
+  </section>
+}
+
 export default async function Home() {
-  const [featured, categories] = await Promise.all([
-    prisma.product.findMany({ where: { status: "ACTIVE", featured: true }, include: { category: true }, take: 4 }),
+  const [products, categories] = await Promise.all([
+    prisma.product.findMany({ where: { status: "ACTIVE" }, include: { category: true }, orderBy: [{ featured: "desc" }, { name: "asc" }], take: 8 }),
     prisma.category.findMany({ where: { active: true }, orderBy: { sortOrder: "asc" }, take: 5 }),
   ])
 
-  return <><SiteHeader/><main>
-    <section className="relative overflow-hidden bg-white">
-      <div className="catalog-dots absolute -left-8 top-12 h-48 w-48 opacity-40"/>
-      <div className="absolute -right-40 -top-48 size-[560px] rounded-full bg-[var(--brand-sky)]/20"/>
-      <div className="container-wide relative grid min-h-[650px] items-center gap-12 py-14 lg:grid-cols-[.92fr_1.08fr] lg:py-20">
-        <div className="relative z-10">
-          <div className="mb-5 inline-flex items-center gap-2 bg-sky-100 px-3 py-2 text-xs font-extrabold uppercase tracking-[.16em] text-[var(--brand-navy)]"><BadgeCheck className="size-4 text-primary"/>Fabricação própria em Paragominas-PA</div>
-          <h1 className="font-display max-w-3xl text-4xl font-black leading-[1.08] tracking-tight text-[var(--brand-ink)] sm:text-5xl lg:text-[3.75rem]">Equipamentos robustos para um manejo <span className="text-primary">seguro e produtivo.</span></h1>
-          <div className="brand-rule mt-6"/>
-          <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-600">Troncos de contenção, balanças, gradis, porteiras e componentes eletrônicos feitos para a realidade do campo. Compre direto de quem fabrica.</p>
-          <div className="mt-8 flex flex-wrap gap-3"><Button asChild size="lg"><Link href="/catalogo">Conhecer equipamentos <ArrowRight/></Link></Button><Button asChild size="lg" variant="outline"><a href="https://wa.me/5591993428963" target="_blank" rel="noreferrer"><MessageCircle/>Falar no WhatsApp</a></Button></div>
-          <div className="mt-9 flex flex-wrap gap-x-7 gap-y-3 border-t border-sky-200 pt-6 text-sm font-semibold text-[var(--brand-navy)]"><span className="flex items-center gap-2"><ShieldCheck className="size-5 text-primary"/>Segurança no manejo</span><span className="flex items-center gap-2"><Wrench className="size-5 text-primary"/>Construção reforçada</span><span className="flex items-center gap-2"><Truck className="size-5 text-primary"/>Atendimento direto</span></div>
-        </div>
-        <div className="relative min-h-[430px] lg:min-h-[540px]">
-          <div className="absolute -inset-y-6 -right-16 left-16 rounded-l-[9rem] bg-[var(--brand-sky)]/35"/>
-          <div className="relative h-full min-h-[430px] overflow-hidden border-[10px] border-white bg-sky-100 shadow-2xl lg:min-h-[540px]"><Image src="/images/products/tronco-americano-contencao.webp" alt="Tronco Americano de Contenção Animal fabricado pela PGM" fill priority sizes="(max-width: 1024px) 100vw, 55vw" className="object-cover"/><div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/85 via-slate-950/45 to-transparent p-7 pt-24 text-white"><p className="text-xs font-bold uppercase tracking-[.2em] text-sky-200">Linha de contenção</p><p className="font-display mt-1 text-2xl font-bold">Tronco Americano PGM</p></div></div>
-          <div className="absolute -bottom-5 -left-5 bg-primary px-5 py-4 text-white shadow-lg"><strong className="block text-xl">Direto da fábrica</strong><span className="text-sm text-sky-100">Paragominas • Pará</span></div>
+  const featured = products.slice(0, 4)
+  const moreProducts = products.slice(4, 8)
+
+  return <><SiteHeader /><main className="bg-white">
+    <section className="container-wide pt-3 sm:pt-4"><HomeHeroSlider /></section>
+
+    <section className="container-wide border-b border-slate-200 py-7">
+      <div className="flex flex-col items-center justify-center gap-4 text-center md:flex-row md:gap-8">
+        <p className="text-lg font-extrabold text-slate-950 sm:text-xl">Deseja atendimento e condições direto da fábrica?</p>
+        <div className="flex flex-wrap justify-center gap-2">
+          <Link href="/login" className="inline-flex min-h-10 min-w-44 items-center justify-center gap-2 rounded-full bg-primary px-6 text-sm font-semibold text-white transition hover:bg-blue-800"><UserRound className="size-4" />Entrar no portal</Link>
+          <Link href="/contato" className="inline-flex min-h-10 min-w-44 items-center justify-center rounded-full bg-primary px-6 text-sm font-semibold text-white transition hover:bg-blue-800">Solicitar cadastro</Link>
         </div>
       </div>
     </section>
 
-    <section className="bg-primary text-white"><div className="container-wide grid divide-y divide-white/20 sm:grid-cols-3 sm:divide-x sm:divide-y-0">{[[Factory,"Fabricação própria","Controle de qualidade em cada etapa"],[Scale,"Pesagem e contenção","Soluções para diferentes portes"],[MapPinned,"Atendimento próximo","Orçamento direto em Paragominas"]].map(([Icon,title,text])=>{const I=Icon as typeof Factory;return <div key={String(title)} className="flex items-center gap-4 px-4 py-6 sm:px-7"><I className="size-8 shrink-0 text-sky-300"/><div><strong className="font-display block text-lg">{String(title)}</strong><span className="text-sm text-sky-100/80">{String(text)}</span></div></div>})}</div></section>
+    <section className="container-wide py-11">
+      <p className="text-center text-xs font-extrabold uppercase tracking-[.18em] text-slate-400">Categorias de produtos</p>
+      <div className="mt-7 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">{categories.map((category) => <Link key={category.id} href={`/catalogo?categoria=${category.slug}`} className="group flex min-h-40 flex-col items-center justify-end px-2 py-3 text-center">
+        <div className="relative h-24 w-full"><Image src={categoryImages[category.slug] ?? "/images/products/tronco-americano-contencao.webp"} alt={category.name} fill sizes="(max-width: 640px) 50vw, 220px" className="object-contain transition duration-300 group-hover:scale-105" /></div>
+        <h2 className="mt-3 max-w-40 text-xs font-extrabold leading-4 text-slate-800 transition group-hover:text-primary">{category.name}</h2>
+      </Link>)}</div>
+    </section>
 
-    <section className="bg-sky-50/60 py-20"><div className="container-wide"><div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between"><div><p className="text-xs font-extrabold uppercase tracking-[.2em] text-primary">Catálogo por aplicação</p><h2 className="font-display mt-2 text-3xl font-black tracking-tight text-slate-950 md:text-4xl">Tudo para a estrutura de manejo</h2><div className="brand-rule-sky mt-4"/></div><Button asChild variant="outline"><Link href="/catalogo">Ver catálogo completo <ArrowRight/></Link></Button></div><div className="mt-10 grid grid-auto gap-4">{categories.map((category,i)=>{const icons=[Factory,Scale,Gauge,MapPinned,Wrench];const Icon=icons[i%icons.length];return <Link href={`/catalogo?categoria=${category.slug}`} key={category.id} className="group border border-sky-200 bg-white p-6 transition hover:-translate-y-1 hover:border-primary hover:shadow-lg"><div className="mb-7 grid size-12 place-items-center bg-sky-100 text-primary"><Icon/></div><h3 className="font-display text-xl font-bold text-slate-950">{category.name}</h3><p className="mt-3 text-sm leading-6 text-slate-600">{category.description||"Soluções profissionais para manejo pecuário."}</p><span className="mt-6 inline-flex items-center gap-1 text-sm font-bold text-primary">Explorar <ArrowRight className="size-4 transition-transform group-hover:translate-x-1"/></span></Link>})}</div></div></section>
+    <ProductShowcase title="Conheça nossos destaques" products={featured} />
 
-    <section className="border-y border-sky-100 bg-white py-20"><div className="container-wide"><div className="max-w-3xl"><p className="text-xs font-extrabold uppercase tracking-[.2em] text-primary">Produtos em destaque</p><h2 className="font-display mt-2 text-3xl font-black tracking-tight text-slate-950 md:text-4xl">Equipamentos reais, feitos para serviço pesado</h2><div className="brand-rule mt-4"/><p className="mt-5 text-slate-600">Veja fotos, detalhes, especificações e solicite condição comercial diretamente em cada produto.</p></div><div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">{featured.map(product=><ProductCard key={product.id} product={product}/>)}</div></div></section>
+    <section className="container-wide pb-4">
+      <div className="relative min-h-[280px] overflow-hidden bg-slate-950">
+        <Image src="/images/campo-gado.webp" alt="Soluções PGM para manejo pecuário" fill sizes="(max-width: 1180px) 100vw, 1180px" className="object-cover opacity-55" />
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/75 to-transparent" />
+        <div className="relative z-10 flex min-h-[280px] max-w-2xl flex-col items-start justify-center px-8 py-10 text-white sm:px-14">
+          <p className="text-xs font-extrabold uppercase tracking-[.2em] text-sky-300">Fabricação própria em Paragominas-PA</p>
+          <h2 className="mt-3 text-3xl font-black leading-tight sm:text-4xl">Força, segurança e praticidade para o seu curral.</h2>
+          <p className="mt-4 max-w-xl text-sm leading-6 text-slate-200">Equipamentos feitos para o trabalho pesado, com configuração adequada à realidade de cada propriedade.</p>
+          <Link href="/empresa" className="mt-6 bg-primary px-7 py-3 text-sm font-extrabold uppercase tracking-wide text-white transition hover:bg-blue-700">Conheça a PGM</Link>
+        </div>
+      </div>
+    </section>
 
-    <section className="bg-sky-50 py-20"><div className="container-wide grid items-stretch gap-0 overflow-hidden bg-white shadow-xl lg:grid-cols-[.92fr_1.08fr]"><div className="relative min-h-[380px]"><Image src="/images/campo-gado.webp" alt="Gado em propriedade rural" fill sizes="(max-width: 1024px) 100vw, 45vw" className="object-cover"/><div className="absolute inset-0 bg-gradient-to-t from-slate-950/50 to-transparent"/></div><div className="p-8 sm:p-12"><p className="text-xs font-extrabold uppercase tracking-[.2em] text-primary">Quem vive o campo sabe</p><h2 className="font-display mt-2 text-3xl font-black text-slate-950 md:text-4xl">Manejo bom precisa unir força, segurança e praticidade.</h2><div className="brand-rule-sky mt-5"/><p className="mt-6 leading-8 text-slate-600">Cada equipamento PGM é pensado para reduzir o estresse do animal, dar mais controle ao operador e agilizar a rotina da propriedade.</p><div className="mt-7 grid gap-4 sm:grid-cols-2">{[[ShieldCheck,"Mais segurança","Estruturas firmes e operação confiável."],[Gauge,"Mais precisão","Pesagem preparada para a rotina rural."],[Wrench,"Mais durabilidade","Madeira de lei e ferragens reforçadas."],[Factory,"Mais produtividade","Fluxo de manejo organizado e ágil."]].map(([Icon,title,text])=>{const I=Icon as typeof ShieldCheck;return <div key={String(title)} className="border-l-4 border-[var(--brand-sky)] pl-4"><I className="size-5 text-primary"/><strong className="font-display mt-2 block text-lg text-slate-950">{String(title)}</strong><p className="mt-1 text-sm leading-6 text-slate-600">{String(text)}</p></div>})}</div></div></div></section>
+    <ProductShowcase title="Mais soluções para sua propriedade" products={moreProducts} />
 
-    <section className="container-wide py-20"><div className="catalog-grid grid overflow-hidden border border-sky-200 bg-white lg:grid-cols-[1fr_.82fr]"><div className="p-8 sm:p-12"><p className="text-xs font-extrabold uppercase tracking-[.2em] text-primary">Portal comercial PGM</p><h2 className="font-display mt-3 text-3xl font-black text-slate-950 md:text-4xl">Orçamentos, pedidos e documentos em uma única área.</h2><p className="mt-5 max-w-2xl leading-7 text-slate-600">Clientes acompanham compras e documentos. Representantes organizam carteira, leads, comissões e propostas. A gestão controla todo o fluxo.</p><div className="mt-7 flex flex-wrap gap-3"><Button asChild size="lg"><Link href="/login">Acessar portal</Link></Button><Button asChild size="lg" variant="outline"><Link href="/contato">Quero ser cliente</Link></Button></div></div><div className="grid grid-cols-2 gap-px bg-sky-200">{[["Cliente","Pedidos e documentos"],["Comercial","Orçamentos e tabelas"],["Representante","Carteira e comissão"],["Gestão","Indicadores e auditoria"]].map(([title,text])=><div key={title} className="bg-sky-50 p-6"><p className="font-display text-xl font-bold text-primary">{title}</p><p className="mt-2 text-sm text-slate-600">{text}</p></div>)}</div></div></section>
-
-    <section className="bg-primary text-white"><div className="container-wide flex flex-col items-start justify-between gap-7 py-12 md:flex-row md:items-center"><div><p className="text-xs font-extrabold uppercase tracking-[.2em] text-sky-200">Vamos conversar?</p><h2 className="font-display mt-2 text-3xl font-black">Conheça o equipamento certo para sua propriedade.</h2></div><Button asChild size="lg" variant="secondary"><a href="https://wa.me/5591993428963" target="_blank" rel="noreferrer"><MessageCircle/>Chamar no WhatsApp</a></Button></div></section>
-  </main><SiteFooter/></>
+    <section className="border-t border-slate-200 bg-[#fafafa] py-14">
+      <div className="container-wide">
+        <h2 className="text-center text-2xl font-normal text-slate-950 sm:text-3xl">Conheça e tire suas dúvidas</h2>
+        <div className="mt-9 grid gap-5 md:grid-cols-3">{infoCards.map(({ icon: Icon, title, text, href }) => <Link key={title} href={href} className="group border border-slate-200 bg-white p-7 transition hover:border-primary/30 hover:shadow-md"><Icon className="size-8 text-primary" /><h3 className="mt-5 text-lg font-extrabold text-slate-950 group-hover:text-primary">{title}</h3><p className="mt-3 text-sm leading-6 text-slate-600">{text}</p><span className="mt-5 inline-block text-sm font-medium text-primary">Saiba mais</span></Link>)}</div>
+        <div className="mt-10 grid gap-px bg-slate-200 sm:grid-cols-3">{serviceHighlights.map(({ icon: Icon, title, text }) => <div key={title} className="flex items-center gap-4 bg-white px-6 py-5"><Icon className="size-7 shrink-0 text-primary" /><div><strong className="block text-sm text-slate-950">{title}</strong><span className="text-xs text-slate-500">{text}</span></div></div>)}</div>
+      </div>
+    </section>
+  </main>
+  <a href="https://wa.me/5591993428963" target="_blank" rel="noreferrer" className="fixed bottom-5 right-5 z-50 inline-flex min-h-12 items-center gap-2 rounded-full bg-emerald-500 px-5 text-sm font-bold text-white shadow-[0_6px_24px_rgba(16,185,129,.35)] transition hover:-translate-y-0.5 hover:bg-emerald-600"><MessageCircle className="size-5"/>Atendimento</a>
+  <SiteFooter /></>
 }

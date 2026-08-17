@@ -2,11 +2,10 @@ import Image from "next/image"
 import { Scale, ShieldCheck, Wrench } from "lucide-react"
 import { cn } from "@/lib/utils"
 
-export function ProductVisual({ name, sku, imageSrc, className, priority = false }: { name: string; sku: string; imageSrc?: string | null; className?: string; priority?: boolean }) {
+export function ProductVisual({ name, sku, imageSrc, className, priority = false, fit = "cover", showSku = true }: { name: string; sku: string; imageSrc?: string | null; className?: string; priority?: boolean; fit?: "cover" | "contain"; showSku?: boolean }) {
   if (imageSrc) return <div className={cn("relative overflow-hidden border bg-white", className)}>
-    <Image src={imageSrc} alt={`${name} - ${sku}`} fill sizes="(max-width: 768px) 100vw, 55vw" priority={priority} className="object-cover transition duration-500 group-hover:scale-[1.025]"/>
-    <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-slate-950/45 to-transparent"/>
-    <span className="absolute bottom-3 right-3 bg-white/90 px-2.5 py-1 font-mono text-[10px] font-bold text-slate-700 backdrop-blur">{sku}</span>
+    <Image src={imageSrc} alt={`${name} - ${sku}`} fill sizes="(max-width: 768px) 100vw, 55vw" priority={priority} className={cn("transition duration-500 group-hover:scale-[1.025]", fit === "contain" ? "object-contain p-3" : "object-cover")}/>
+    {showSku ? <><div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-slate-950/45 to-transparent"/><span className="absolute bottom-3 right-3 bg-white/90 px-2.5 py-1 font-mono text-[10px] font-bold text-slate-700 backdrop-blur">{sku}</span></> : null}
   </div>
   return <div className={cn("relative overflow-hidden border bg-gradient-to-br from-sky-50 via-white to-sky-100", className)}>
     <div className="absolute -right-20 -top-20 size-64 rounded-full border-[30px] border-primary/5" />

@@ -1,7 +1,37 @@
-import Link from "next/link"
 import Image from "next/image"
+import Link from "next/link"
 import { Mail, MapPin, Phone } from "lucide-react"
 
 export function SiteFooter() {
-  return <footer className="border-t-[6px] border-[var(--brand-sky)] bg-white text-slate-700"><div className="container-wide grid gap-10 py-14 md:grid-cols-[1.45fr_1fr_1fr_1.2fr]"><div><Image src="/images/logo-pgm-completo.png" alt="Troncos e Balanças Paragominas" width={841} height={382} sizes="300px" className="h-auto w-[290px] max-w-full"/><p className="mt-4 max-w-sm text-sm leading-6 text-slate-600">Fabricação de equipamentos robustos para contenção, manejo e pesagem de gado, com atendimento direto em Paragominas.</p></div><div><h3 className="font-display text-lg font-bold text-slate-950">Produtos</h3><div className="mt-4 grid gap-2 text-sm"><Link href="/catalogo">Catálogo completo</Link><Link href="/catalogo?categoria=troncos-de-contencao">Troncos</Link><Link href="/catalogo?categoria=balancas-pecuarias">Balanças</Link><Link href="/catalogo?categoria=pecas-e-eletronica">Linha eletrônica</Link></div></div><div><h3 className="font-display text-lg font-bold text-slate-950">Empresa</h3><div className="mt-4 grid gap-2 text-sm"><Link href="/empresa">A PGM</Link><Link href="/representantes">Representantes</Link><Link href="/contato">Contato</Link><Link href="/login">Portal B2B</Link></div></div><div><h3 className="font-display text-lg font-bold text-slate-950">Fale com a fábrica</h3><div className="mt-4 grid gap-3 text-sm"><a href="tel:+5591993428963" className="flex gap-2"><Phone className="size-4 shrink-0 text-primary"/>(91) 99342-8963</a><a href="tel:+5591992154103" className="flex gap-2"><Phone className="size-4 shrink-0 text-primary"/>(91) 99215-4103</a><a href="mailto:ozielvasconscelos2014@gmail.com" className="flex gap-2 break-all"><Mail className="size-4 shrink-0 text-primary"/>ozielvasconscelos2014@gmail.com</a><span className="flex gap-2"><MapPin className="size-4 shrink-0 text-primary"/>Paragominas-PA</span></div></div></div><div className="border-t border-sky-100 bg-sky-50/70"><div className="container-wide flex flex-col gap-2 py-5 text-xs text-slate-600 sm:flex-row sm:items-center sm:justify-between"><span>© 2026 Troncos e Balanças Paragominas. Todos os direitos reservados.</span><strong className="font-display text-sm text-primary">Tecnologia, segurança e confiança para o manejo do seu gado.</strong></div></div></footer>
+  return <footer className="border-t-4 border-primary bg-[#fafafa] text-slate-700">
+    <div className="container-wide grid gap-10 py-12 md:grid-cols-[1.45fr_1fr_1fr_1.2fr]">
+      <div>
+        <Image src="/images/logo-pgm-completo.png" alt="Troncos e Balanças Paragominas" width={841} height={382} sizes="280px" className="h-auto w-[270px] max-w-full" />
+        <p className="mt-4 max-w-sm text-sm leading-6 text-slate-600">Fabricação de equipamentos robustos para contenção, manejo e pesagem de gado, com atendimento direto em Paragominas.</p>
+      </div>
+      <div>
+        <h3 className="text-sm font-extrabold uppercase tracking-wide text-slate-950">Produtos</h3>
+        <div className="mt-4 grid gap-2.5 text-sm"><Link href="/catalogo">Catálogo completo</Link><Link href="/catalogo?categoria=troncos-de-contencao">Troncos</Link><Link href="/catalogo?categoria=balancas-pecuarias">Balanças</Link><Link href="/catalogo?categoria=pecas-e-eletronica">Linha eletrônica</Link></div>
+      </div>
+      <div>
+        <h3 className="text-sm font-extrabold uppercase tracking-wide text-slate-950">Empresa</h3>
+        <div className="mt-4 grid gap-2.5 text-sm"><Link href="/empresa">A PGM</Link><Link href="/representantes">Representantes</Link><Link href="/contato">Contato</Link><Link href="/login">Portal B2B</Link></div>
+      </div>
+      <div>
+        <h3 className="text-sm font-extrabold uppercase tracking-wide text-slate-950">Fale com a fábrica</h3>
+        <div className="mt-4 grid gap-3 text-sm">
+          <a href="tel:+5591993428963" className="flex gap-2"><Phone className="size-4 shrink-0 text-primary" />(91) 99342-8963</a>
+          <a href="tel:+5591992154103" className="flex gap-2"><Phone className="size-4 shrink-0 text-primary" />(91) 99215-4103</a>
+          <a href="mailto:ozielvasconscelos2014@gmail.com" className="flex gap-2 break-all"><Mail className="size-4 shrink-0 text-primary" />ozielvasconscelos2014@gmail.com</a>
+          <span className="flex gap-2"><MapPin className="size-4 shrink-0 text-primary" />Paragominas-PA</span>
+        </div>
+      </div>
+    </div>
+    <div className="border-t border-slate-200 bg-white">
+      <div className="container-wide flex flex-col gap-2 py-5 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">
+        <span>© 2026 Troncos e Balanças Paragominas. Todos os direitos reservados.</span>
+        <strong className="text-sm text-primary">Tecnologia, segurança e confiança para o manejo do seu gado.</strong>
+      </div>
+    </div>
+  </footer>
 }
