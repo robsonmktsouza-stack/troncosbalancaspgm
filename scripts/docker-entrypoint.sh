@@ -1,7 +1,5 @@
 #!/bin/sh
 set -eu
-echo "[PGM] Gerando Prisma Client..."
-npx prisma generate
 echo "[PGM] Sincronizando banco..."
 npx prisma db push --skip-generate
 echo "[PGM] Dados iniciais..."
